@@ -1,0 +1,11 @@
+[Unit]
+Description=Background Music Player
+After=network.target sound.target
+
+[Service]
+ExecStart=/usr/local/bin/bgm
+KillMode=process
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
