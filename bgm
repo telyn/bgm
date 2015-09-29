@@ -13,6 +13,6 @@ while true; do
 
     echo "Playing $MP3"
 
-    mpg123 "$MUSICFOLDER/$MP3"
+    mpg123 --rva-mix "$MUSICFOLDER/$MP3"
 
 done
