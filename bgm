@@ -11,7 +11,7 @@ while true; do
 	MP3=$(grep -oP "`basename $MUSICFOLDER`/.+")
     fi
 
-    echo "Playing $MP3"
+    echo "Playing $MP3" | tee -a /var/log/bgm.log
 
     mpg123 --rva-mix "$MUSICFOLDER/$MP3"
 
