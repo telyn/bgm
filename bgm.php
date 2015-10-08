@@ -17,16 +17,13 @@ case 'set-playlist':
     fclose($fh)
 	break;
 
-case 'get-queue':
-    print file_get_contents(QUEUE)
-	break;
-
 case 'add-queue':
     fopen($fh, QUEUE, 'a')
 	foreach $_GET['mp3'] as $i => $mp3 {
 	    fwrite($fh, $mp3 . "\r\n")
 	}
     fclose($fh)
+	break;
 
 case 'get-playlists':
     $dh = opendir(PLAYLISTS_DIR)
