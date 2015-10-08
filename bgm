@@ -10,7 +10,7 @@ DEFAULTPLAYLIST=background-music.m3u8
 
 # pre flight checks
 
-if [ ! -e $DEFAULTPLAYLIST ]; then
+if [ ! -e $PLAYLISTS/$DEFAULTPLAYLIST ]; then
     echo "please make $DEFAULTPLAYLIST"
     exit 1
 fi 
@@ -24,7 +24,11 @@ while true; do
     if read -t 0.25 FILE <&7 ; then
 
 	MP3=`echo "$FILE" | tr '\' '/'`
-	if [ ! -e "$MUSICFOLDER/$MP3" ]; then
+	if [ ! -e "$MP3" ]; then
+	    echo "$MP3 doesn't exist! Prepending $MUSICFOLDER"
+	    MP3=$MUSICFOLDER/$MP3
+	fi
+	if [ ! -e "$MP3" ]; then
 	    echo "$MP3 doesn't exist! Messing with it"
 	    MP3=$(grep -oP "`basename $MUSICFOLDER`/.+")
 	fi
@@ -42,8 +46,12 @@ while true; do
 	    PLAYLIST=$DEFAULTPLAYLIST
 	fi
 
-	MP3=$(grep -vP "#EXT" $PLAYLISTS/$PLAYLIST | grep -P "\.mp3$" | shuf -n 1 | tr '\' '/')
-	if [ ! -e "$MUSICFOLDER/$MP3" ]; then
+	MP3=$(grep -vP "#EXT" $PLAYLISTS/$PLAYLIST | grep -P "\.mp3$" | shuf -n 1 | tr '\\' '/')
+	if [ ! -e "$MP3" ]; then
+	    echo "$MP3 doesn't exist! Prepending $MUSICFOLDER"
+	    MP3=$MUSICFOLDER/$MP3
+	fi
+	if [ ! -e "$MP3" ]; then
 	    echo "$MP3 doesn't exist! Messing with it"
 	    MP3=$(grep -oP "`basename $MUSICFOLDER`/.+")
 	fi
@@ -51,6 +59,6 @@ while true; do
 	echo "Playing $MP3 from $PLAYLIST" | tee $LOG
     fi
 
-    mpg123 --rva-mix "$MUSICFOLDER/$MP3"
+    mpg123 --rva-mix "$MP3"
 
 done
