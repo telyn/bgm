@@ -23,7 +23,7 @@ while true; do
 
     if read -t 0.25 FILE <&7 ; then
 
-	MP3=`echo "$FILE" | tr '\' '/'`
+	MP3=`echo -n "$FILE" | sed -e 's/[[:space:]]*$//' | tr '\\' '/'`
 	if [ ! -e "$MP3" ]; then
 	    echo "$MP3 doesn't exist! Prepending $MUSICFOLDER"
 	    MP3=$MUSICFOLDER/$MP3
