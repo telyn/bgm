@@ -20,7 +20,7 @@ case 'set-playlist':
     break;
 
 case 'add-queue':
-    fopen($fh, QUEUE, 'a');
+    $fh = fopen(QUEUE, 'a');
     foreach($_GET['mp3'] as $i => $mp3) {
 	fwrite($fh, $mp3 . "\r\n");
     }
