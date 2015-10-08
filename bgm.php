@@ -6,6 +6,8 @@ define('PLAYLISTS_DIR', LIBDIR.'/playlists');
 define('QUEUE', RUNDIR.'/queue');
 define('CURRENT_PLAYLIST', RUNDIR.'/playlist');
 
+header('Content-Type: text/plain');
+
 switch($_GET['mode']) {
 case 'get-playlist':
     print file_get_contents(CURRENT_PLAYLIST);
@@ -31,7 +33,7 @@ case 'get-playlists':
 	if(substr($pl,0,1) == '.') {
 	    continue;
 	}
-	print substr($pl, 0, strpos($pl, '.'));
+	print substr($pl, 0, strpos($pl, '.'))."\r\n";
     }
 }
 
