@@ -1,17 +1,55 @@
-#!/bin/bash
+#!/bin/zsh
 
+VARRUN=/var/run/bgm
+VARLIB=/var/lib/bgm
 MUSICFOLDER=/music
-PLAYLIST=background-music.m3u8
+LOG=/var/log/bgm.log
+PLAYLISTS=$VARLIB/playlists
+QUEUE=$VARRUN/queue
+DEFAULTPLAYLIST=background-music.m3u8
+
+# pre flight checks
+
+if [ ! -e $DEFAULTPLAYLIST ]; then
+    echo "please make $DEFAULTPLAYLIST"
+    exit 1
+fi 
+
+
+exec 7<>$QUEUE
 
 while true; do
 
-    MP3=$(grep -vP "#EXT" $MUSICFOLDER/$PLAYLIST | grep -P "\.mp3$" | shuf -n 1 | tr '\' '/')
-    if [ ! -e "$MUSICFOLDER/$MP3" ]; then
-        echo "$MP3 doesn't exist! Messing with it"
-	MP3=$(grep -oP "`basename $MUSICFOLDER`/.+")
-    fi
 
-    echo "Playing $MP3" | tee -a /var/log/bgm.log
+    if read -t 0.25 FILE <&7 ; then
+
+	MP3=`echo "$FILE" | tr '\' '/'`
+	if [ ! -e "$MUSICFOLDER/$MP3" ]; then
+	    echo "$MP3 doesn't exist! Messing with it"
+	    MP3=$(grep -oP "`basename $MUSICFOLDER`/.+")
+	fi
+
+	echo "Playing $MP3 from the queue" | tee $LOG
+
+    else
+
+	PLAYLIST=$(head -n 1 $VARRUN/playlist).m3u8
+	if [ $? -ne 0 ]; then
+	    PLAYLIST=$DEFAULTPLAYLIST
+	fi
+
+	if [ ! -e $PLAYLISTS/$PLAYLIST ] ; then
+	    PLAYLIST=$DEFAULTPLAYLIST
+	fi
+
+	MP3=$(grep -vP "#EXT" $PLAYLISTS/$PLAYLIST | grep -P "\.mp3$" | shuf -n 1 | tr '\' '/')
+	if [ ! -e "$MUSICFOLDER/$MP3" ]; then
+	    echo "$MP3 doesn't exist! Messing with it"
+	    MP3=$(grep -oP "`basename $MUSICFOLDER`/.+")
+	fi
+
+	echo "Playing $MP3 from $PLAYLIST" | tee $LOG
+    fi
 
     mpg123 --rva-mix "$MUSICFOLDER/$MP3"
 
