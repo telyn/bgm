@@ -6,7 +6,7 @@ define('PLAYLISTS_DIR', LIBDIR.'/playlists');
 define('QUEUE', RUNDIR.'/queue');
 define('CURRENT_PLAYLIST', RUNDIR.'/playlist');
 
-header('Content-Type: text/plain');
+header('Content-Type: text/plain; charset=utf-8');
 
 switch($_GET['mode']) {
 case 'get-playlist':
