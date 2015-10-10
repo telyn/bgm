@@ -40,7 +40,7 @@ case 'get-song':
     print file_get_contents(RUNDIR.'/current-song');
     break;
 case 'skip':
-    system('sudo killall mpg123');
+    system('sudo /usr/bin/killall mpg123');
     break;
 }
 
