@@ -16,6 +16,22 @@ if [ ! -e $PLAYLISTS/$DEFAULTPLAYLIST ]; then
 fi 
 
 
+if [ ! -e $VARRUN ]; then
+    mkdir $VARRUN
+    chown www-data:www-data $VARRUN
+fi
+
+if [ ! -e $VARRUN/playlist ]; then
+    touch $VARRUN/playlist
+    chown www-data:www-data $VARRUN/playlist
+fi
+
+if [ ! -e $QUEUE ]; then
+    mkfifo $QUEUE
+    chown www-data:www-data $QUEUE
+fi
+
+
 exec 7<>$QUEUE
 
 while true; do
