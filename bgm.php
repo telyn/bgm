@@ -35,6 +35,10 @@ case 'get-playlists':
 	}
 	print substr($pl, 0, strpos($pl, '.'))."\r\n";
     }
+    break;
+case 'get-song':
+    print file_get_contents(RUNDIR.'/current-song');
+    break;
 }
 
 ?>

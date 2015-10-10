@@ -75,6 +75,8 @@ while true; do
 	echo "Playing $MP3 from $PLAYLIST" | tee $LOG
     fi
 
+    echo "$MP3" > $VARRUN/current-song
+
     mpg123 --rva-mix "$MP3"
 
 done
