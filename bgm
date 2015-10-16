@@ -8,75 +8,86 @@ PLAYLISTS=$VARLIB/playlists
 QUEUE=$VARRUN/queue
 DEFAULTPLAYLIST=background-music.m3u8
 
-# pre flight checks
 
-if [ ! -e $PLAYLISTS/$DEFAULTPLAYLIST ]; then
-    echo "please make $DEFAULTPLAYLIST"
-    exit 1
-fi 
+case "$1" in
+    now)
+	id3 -l -R "$VARRUN/current-song"
+	;;
 
+    start)
+	# pre flight checks
 
-if [ ! -e $VARRUN ]; then
-    mkdir $VARRUN
-    chown www-data:www-data $VARRUN
-fi
-
-if [ ! -e $VARRUN/playlist ]; then
-    touch $VARRUN/playlist
-    chown www-data:www-data $VARRUN/playlist
-fi
-
-if [ ! -e $QUEUE ]; then
-    mkfifo $QUEUE
-    chown www-data:www-data $QUEUE
-fi
-
-
-exec 7<>$QUEUE
-
-while true; do
-
-
-    if read -t 0.25 FILE <&7 ; then
-
-	MP3=`echo -n "$FILE" | sed -e 's/[[:space:]]*$//' | tr '\\' '/'`
-	if [ ! -e "$MP3" ]; then
-	    echo "$MP3 doesn't exist! Prepending $MUSICFOLDER"
-	    MP3=$MUSICFOLDER/$MP3
+	if [ ! -e $PLAYLISTS/$DEFAULTPLAYLIST ]; then
+	    echo "please make $DEFAULTPLAYLIST"
+	    exit 1
 	fi
-	if [ ! -e "$MP3" ]; then
-	    echo "$MP3 doesn't exist! Messing with it"
-	    MP3=$(grep -oP "`basename $MUSICFOLDER`/.+")
+
+
+	if [ ! -e $VARRUN ]; then
+	    mkdir $VARRUN
+	    chown www-data:www-data $VARRUN
 	fi
+
+	if [ ! -e $VARRUN/playlist ]; then
+	    touch $VARRUN/playlist
+	    chown www-data:www-data $VARRUN/playlist
+	fi
+
+	if [ ! -e $QUEUE ]; then
+	    mkfifo $QUEUE
+	    chown www-data:www-data $QUEUE
+	fi
+
+
+	exec 7<>$QUEUE
+
+	while true; do
+
 
 	echo "Playing $MP3 from the queue" | tee $LOG
 
-    else
+	    if read -t 0.25 FILE <&7 ; then
 
-	PLAYLIST=$(head -n 1 $VARRUN/playlist).m3u8
-	if [ $? -ne 0 ]; then
-	    PLAYLIST=$DEFAULTPLAYLIST
-	fi
+		MP3=`echo -n "$FILE" | sed -e 's/[[:space:]]*$//' | tr '\\' '/'`
+		if [ ! -e "$MP3" ]; then
+		    echo "$MP3 doesn't exist! Prepending $MUSICFOLDER"
+		    MP3=$MUSICFOLDER/$MP3
+		fi
+		if [ ! -e "$MP3" ]; then
+		    echo "$MP3 doesn't exist! Messing with it"
+		    MP3=$(grep -oP "`basename $MUSICFOLDER`/.+")
+		fi
 
-	if [ ! -e $PLAYLISTS/$PLAYLIST ] ; then
-	    PLAYLIST=$DEFAULTPLAYLIST
-	fi
+		echo "Playing $MP3 from the queue" | tee -a $LOG
 
-	MP3=$(grep -vP "#EXT" $PLAYLISTS/$PLAYLIST | grep -P "\.mp3$" | shuf -n 1 | tr '\\' '/')
-	if [ ! -e "$MP3" ]; then
-	    echo "$MP3 doesn't exist! Prepending $MUSICFOLDER"
-	    MP3=$MUSICFOLDER/$MP3
-	fi
-	if [ ! -e "$MP3" ]; then
-	    echo "$MP3 doesn't exist! Messing with it"
-	    MP3=$(grep -oP "`basename $MUSICFOLDER`/.+")
-	fi
+	    else
 
-	echo "Playing $MP3 from $PLAYLIST" | tee $LOG
-    fi
+		PLAYLIST=$(head -n 1 $VARRUN/playlist).m3u8
+		if [ $? -ne 0 ]; then
+		    PLAYLIST=$DEFAULTPLAYLIST
+		fi
 
-    echo "$MP3" > $VARRUN/current-song
+		if [ ! -e $PLAYLISTS/$PLAYLIST ] ; then
+		    PLAYLIST=$DEFAULTPLAYLIST
+		fi
 
-    mpg123 --rva-mix "$MP3"
+		MP3=$(grep -vP "#EXT" $PLAYLISTS/$PLAYLIST | grep -P "\.mp3$" | shuf -n 1 | tr '\\' '/')
+		if [ ! -e "$MP3" ]; then
+		    echo "$MP3 doesn't exist! Prepending $MUSICFOLDER"
+		    MP3=$MUSICFOLDER/$MP3
+		fi
+		if [ ! -e "$MP3" ]; then
+		    echo "$MP3 doesn't exist! Messing with it"
+		    MP3=$(grep -oP "`basename $MUSICFOLDER`/.+")
+		fi
 
-done
+		echo "Playing $MP3 from $PLAYLIST" | tee -a $LOG
+	    fi
+
+	    echo "$MP3" > $VARRUN/current-song
+
+	    mpg123 --rva-mix "$MP3"
+
+	done
+	;;
+esac
