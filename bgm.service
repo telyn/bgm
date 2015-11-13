@@ -3,7 +3,7 @@ Description=Background Music Player
 After=network.target sound.target
 
 [Service]
-ExecStart=/usr/local/bin/bgm
+ExecStart=/usr/local/bin/bgm start
 KillMode=process
 Restart=on-failure
 

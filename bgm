@@ -11,7 +11,8 @@ DEFAULTPLAYLIST=background-music.m3u8
 
 case "$1" in
     now)
-	id3 -l -R "$VARRUN/current-song"
+	id3 -l -R "$(<$VARRUN/current-song)"
+	exit 0
 	;;
 
     start)
