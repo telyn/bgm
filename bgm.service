@@ -1,6 +1,6 @@
 [Unit]
 Description=Background Music Player
-After=network.target sound.target
+RequiresMountsFor=/music
 
 [Service]
 ExecStart=/usr/local/bin/bgm start
