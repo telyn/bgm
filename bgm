@@ -11,10 +11,33 @@ DEFAULTPLAYLIST=background-music.m3u8
 
 case "$1" in
     now)
-	id3 -l -R "$(<$VARRUN/current-song)"
+	MP3LINE=$(<$VARRUN/current-song)
+	id3 -l -R "${MP3LINE% #*}"
 	exit 0
 	;;
-
+    scrobble)
+	set -x
+	if [ ! -e "$VARLIB/subsonic" ]; then
+	    echo "You must specify subsonic connection details in $VARLIB/subsonic like so:"
+	    echo "<host with url scheme> <user> <pass>"
+	    echo ""
+	    echo "e.g. https://my-subsonic-server bgm coolpassword"
+	    exit 0
+	fi
+	if [ ! -e "$VARRUN/last-scrobbled" ]; then
+	    touch "$VARRUN/last-scrobbled"
+	fi
+        SUBSONIC=$(<$VARLIB/subsonic)
+	HOST=$(echo $SUBSONIC | awk '{ print $1 }')
+	UNAME=$(echo $SUBSONIC | awk '{ print $2 }')
+	PASS=$(echo $SUBSONIC | awk '{ print $3 }')
+	LASTSCROBBLED=$(<$VARRUN/last-scrobbled)
+	MP3=$(<$VARRUN/current-song)
+	if [ "$MP3" != "$LASTSCROBBLED" ]; then
+	    curl "$HOST/rest/scrobble.view?u=$UNAME&p=$PASS&c=`hostname -s`&v=1.12.0&id=${MP3##*#}"
+	    echo "$MP3" > "$VARRUN/last-scrobbled"
+	fi
+	;;
     start)
 	# pre flight checks
 
@@ -50,6 +73,7 @@ case "$1" in
 	    if read -t 0.25 FILE <&7 ; then
 
 		MP3=`echo -n "$FILE" | sed -e 's/[[:space:]]*$//' | tr '\\' '/'`
+		MP3LINE="$MP3"
 		if [ ! -e "$MP3" ]; then
 		    echo "$MP3 doesn't exist! Prepending $MUSICFOLDER"
 		    MP3=$MUSICFOLDER/$MP3
@@ -72,7 +96,8 @@ case "$1" in
 		    PLAYLIST=$DEFAULTPLAYLIST
 		fi
 
-		MP3=$(grep -vP "#EXT" $PLAYLISTS/$PLAYLIST | grep -P "\.mp3$" | shuf -n 1 | tr '\\' '/')
+		MP3LINE=$(grep -vP "#EXT" $PLAYLISTS/$PLAYLIST | grep -P "\.mp3" | shuf -n 1 | tr '\\' '/')
+		MP3=${MP3LINE% #*}
 		if [ ! -e "$MP3" ]; then
 		    echo "$MP3 doesn't exist! Prepending $MUSICFOLDER"
 		    MP3=$MUSICFOLDER/$MP3
@@ -85,7 +110,7 @@ case "$1" in
 		echo "Playing $MP3 from $PLAYLIST" | tee -a $LOG
 	    fi
 
-	    echo "$MP3" > $VARRUN/current-song
+	    echo "$MP3LINE" > $VARRUN/current-song
 
 	    mpg123 --rva-mix "$MP3"
 
