@@ -16,7 +16,6 @@ case "$1" in
 	exit 0
 	;;
     scrobble)
-	set -x
 	if [ ! -e "$VARLIB/subsonic" ]; then
 	    echo "You must specify subsonic connection details in $VARLIB/subsonic like so:"
 	    echo "<host with url scheme> <user> <pass>"
@@ -111,6 +110,7 @@ case "$1" in
 	    fi
 
 	    echo "$MP3LINE" > $VARRUN/current-song
+	    bgm scrobble
 
 	    mpg123 --rva-mix "$MP3"
 
