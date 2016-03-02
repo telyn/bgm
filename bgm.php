@@ -10,7 +10,11 @@ header('Content-Type: text/plain; charset=utf-8');
 
 switch($_GET['mode']) {
 case 'get-playlist':
-    print file_get_contents(CURRENT_PLAYLIST);
+    $pl = file_get_contents(CURRENT_PLAYLIST);
+    if trim($pl) == "" {
+	$pl = "background-music";
+    }
+    print $pl;
     break;
 
 case 'set-playlist':
