@@ -8,6 +8,13 @@ PLAYLISTS=$VARLIB/playlists
 QUEUE=$VARRUN/queue
 DEFAULTPLAYLIST=background-music.m3u8
 
+if [ -f $VARLIB/subsonic ]; then
+    SUBSONIC=$(<$VARLIB/subsonic)
+    SUBSONIC_HOST=$(echo $SUBSONIC | awk '{ print $1 }')
+    SUBSONIC_USER=$(echo $SUBSONIC | awk '{ print $2 }')
+    SUBSONIC_PASS=$(echo $SUBSONIC | awk '{ print $3 }')
+fi
+
 
 case "$1" in
     now)
@@ -16,8 +23,11 @@ case "$1" in
 	exit 0
 	;;
     scrobble)
-	if [ ! -e "$VARLIB/subsonic" ]; then
-	    echo "You must specify subsonic connection details in $VARLIB/subsonic like so:"
+	if [ -z "$SUBSONIC_HOST" ] || [ -z "$SUBSONIC_USER" ] || [ -z "$SUBSONIC_PASS" ]; then
+	    echo "You must specify subsonic connection details, either as"
+	    echo "the SUBSONIC_HOST, SUBSONIC_USER and SUBSONIC_PASS environment"
+	    echo "variables, or in $VARLIB/subsonic like so:"
+	    echo ""
 	    echo "<host with url scheme> <user> <pass>"
 	    echo ""
 	    echo "e.g. https://my-subsonic-server bgm coolpassword"
@@ -26,10 +36,6 @@ case "$1" in
 	if [ ! -e "$VARRUN/last-scrobbled" ]; then
 	    touch "$VARRUN/last-scrobbled"
 	fi
-        SUBSONIC=$(<$VARLIB/subsonic)
-	HOST=$(echo $SUBSONIC | awk '{ print $1 }')
-	UNAME=$(echo $SUBSONIC | awk '{ print $2 }')
-	PASS=$(echo $SUBSONIC | awk '{ print $3 }')
 	LASTSCROBBLED=$(<$VARRUN/last-scrobbled)
 	MP3=$(<$VARRUN/current-song)
 	if [ "$MP3" != "$LASTSCROBBLED" ]; then
