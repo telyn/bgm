@@ -39,7 +39,7 @@ case "$1" in
 	LASTSCROBBLED=$(<$VARRUN/last-scrobbled)
 	MP3=$(<$VARRUN/current-song)
 	if [ "$MP3" != "$LASTSCROBBLED" ]; then
-	    curl "$HOST/rest/scrobble.view?u=$UNAME&p=$PASS&c=`hostname -s`&v=1.12.0&id=${MP3##*#}"
+	    curl "$SUBSONIC_HOST/rest/scrobble.view?u=$SUBSONIC_USER&p=$SUBSONIC_PASS&c=`hostname -s`&v=1.12.0&id=${MP3##*#}"
 	    echo "$MP3" > "$VARRUN/last-scrobbled"
 	fi
 	;;
